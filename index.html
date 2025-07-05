@@ -1,117 +1,127 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>生日特别任务系统 v3.5</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --main-color: #29caff;
-      --secondary-color: #8ddcff;
-      --bg-dark: rgba(12, 12, 30, 0.88);
+    :root { --main-color: #29caff; --secondary-color: #8ddcff; --bg-dark: rgba(12,12,30,0.88); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Orbitron', sans-serif; background: #000; color: #f2f2f2; overflow-x: hidden; min-height: 100vh; }
+    .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.8; animation: starMove linear infinite; }
+    @keyframes starMove { from { transform: translateY(-100px); } to { transform: translateY(100vh); } }
+
+    .container { position: relative; z-index: 2; max-width: 780px; margin: 40px auto; padding: 30px; background: var(--bg-dark); border: 2px solid var(--main-color); border-radius: 18px; backdrop-filter: blur(6px); box-shadow: 0 0 25px var(--main-color); animation: fadeInContainer 1.2s ease-in-out; }
+
+    /* Avatar 心形图标 */
+    .avatar { font-size: 64px; width: 80px; height: 80px; margin: 0 auto 1em; display: flex; align-items: center; justify-content: center; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    .title { text-align: center; color: var(--secondary-color); font-size: clamp(1.5rem,4vw,2rem); margin-bottom: 1em; text-shadow: 0 0 8px var(--main-color),0 0 15px #114c88; animation: fadeIn 1s ease-in-out; }
+
+    .module { opacity: 0; background: rgba(10,25,45,0.75); margin: 20px 0; padding: 20px; border: 1px solid var(--main-color); border-radius: 14px; box-shadow: 0 0 10px rgba(41,202,255,0.2); animation: slideUp 0.8s ease forwards; }
+    .module:nth-of-type(1) { animation-delay: 0.2s; }
+    .module:nth-of-type(2) { animation-delay: 0.4s; }
+    .module:nth-of-type(3) { animation-delay: 0.6s; }
+    .module:nth-of-type(4) { animation-delay: 0.8s; }
+    .module h3 { color: #fff3ff; font-size: 1.2rem; margin-bottom: 0.6em; text-shadow: 0 0 4px #ff8aff; }
+    .module p { margin: 0.5em 0; line-height: 1.7; }
+
+    /* 点击进入 链接样式 */
+    .enter-link { color: #ff69b4; font-weight: bold; text-decoration: none; }
+    .enter-link:hover { text-decoration: underline; }
+
+    .footer { text-align: center; color: #aaa; font-size: 0.9rem; margin-top: 2em; text-shadow: 0 0 5px #3d7aff; }
+
+    .popup { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; z-index:1000; opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+    .popup.active { opacity:1; pointer-events:all; }
+    .popup-content { background:#06142e; padding:30px; border-radius:24px; box-shadow:0 0 40px var(--main-color); text-align:center; max-width:90%; width:420px; transform:scale(0.9); transition:transform 0.3s ease; }
+    .popup.active .popup-content { transform:scale(1); }
+    .popup-content h2 { margin-bottom:1em; color:#ffe3ff; text-shadow:0 0 5px #bfffef; }
+    .popup-content p { margin-bottom:1.5em; color:#c2e9ff; }
+    .popup-content button { padding:12px 24px; border:none; background:var(--main-color); color:#fff; font-size:1rem; border-radius:12px; cursor:pointer; box-shadow:0 0 15px var(--main-color); transition:all 0.3s ease; }
+    .popup-content button:hover { background:#5cd9ff; transform:translateY(-2px); }
+
+    .audio-container { margin:20px 0; padding:15px; background:rgba(10,25,45,0.5); border:1px solid var(--main-color); border-radius:12px; }
+    .audio-container audio { width:100%; }
+
+    .image-viewer { margin:20px 0; cursor:zoom-in; }
+    .image-viewer img { max-width:100%; max-height:60vh; border-radius:10px; border:2px solid var(--main-color); box-shadow:0 0 20px rgba(41,202,255,0.5); transition:transform 0.2s ease; }
+    .image-viewer img:hover { transform:scale(1.02); }
+
+    #lightbox { background:rgba(0,0,0,0.95); }
+    #lightbox .popup-content { background:transparent; box-shadow:none; padding:0; max-width:90vw; max-height:90vh; }
+    #zoomedImage { max-width:90vw; max-height:85vh; border:3px solid var(--main-color); box-shadow:0 0 30px rgba(41,202,255,0.7); object-fit:contain; }
+    .close-btn { position:absolute; top:20px; right:20px; width:40px; height:40px; border-radius:50%; background:#ff4757; color:#fff; border:none; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:1001; }
+
+    @media(max-width:600px) {
+      .container { padding:20px; margin:20px auto; }
+      .module { padding:15px; }
+      .popup-content { padding:20px; }
+      #zoomedImage { max-height:70vh; }
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: #000;
-      color: #fff;
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
-    .stars {
-      width: 100%; height: 100%;
-      position: fixed; top: 0; left: 0;
-      background: transparent;
-      z-index: 0; pointer-events: none;
-    }
-    .star {
-      position: absolute;
-      background: white; border-radius: 50%;
-      opacity: 0.8;
-      animation: starMove linear infinite;
-    }
-    @keyframes starMove {
-      from { transform: translateY(-100px); }
-      to   { transform: translateY(100vh); }
-    }
-    .container {
-      width: 95%; max-width: 780px;
-      margin: 40px auto; padding: 30px;
-      background: var(--bg-dark);
-      border: 2px solid var(--main-color);
-      border-radius: 18px;
-      box-shadow: 0 0 25px var(--main-color);
-      backdrop-filter: blur(6px);
-      position: relative; z-index: 2;
-      animation: fadeInContainer 1.2s ease-in-out;
-    }
-    .avatar {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 1em;
-      border-radius: 50%;
-      background: url('https://i.ibb.co/Jy1YsxX/pix-heart.png') no-repeat center/cover;
-      box-shadow: 0 0 10px var(--main-color);
-      animation: float 3s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%,100% { transform: translateY(0); }
-      50%     { transform: translateY(-8px); }
-    }
-    .title {
-      font-size: clamp(1.5rem, 4vw, 2rem);
-      color: var(--secondary-color);
-      margin: 0 0 1em;
-      text-shadow: 0 0 8px var(--main-color), 0 0 15px #114c88;
-      text-align: center;
-      animation: fadeIn 1s ease-in-out;
-    }
-    .module {
-      background: rgba(10,25,45,0.75);
-      padding: 20px;
-      border: 1px solid var(--main-color);
-      border-radius: 14px;
-      margin: 20px 0;
-      opacity: 0;
-      animation: slideUp 0.8s ease forwards;
-    }
-    .module:nth-of-type(1) { animation-delay: .2s; }
-    .module:nth-of-type(2) { animation-delay: .4s; }
-    .module:nth-of-type(3) { animation-delay: .6s; }
-    .module:nth-of-type(4) { animation-delay: .8s; }
-    .module h3 {
-      margin: 0 0 .6em;
-      color: #fff3ff;
-      font-size: 1.2rem;
-      text-shadow: 0 0 4px #ff8aff;
-    }
-    .module p {
-      margin: .3em 0;
-      line-height: 1.7;
-      color: #f2f2f2;
-    }
-    .footer {
-      margin-top: 2em;
-      font-size: .9rem;
-      color: #aaa;
-      text-align: center;
-      text-shadow: 0 0 5px #3d7aff;
-    }
+
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    @keyframes fadeInContainer { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:scale(1); } }
+    @keyframes slideUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
   </style>
 </head>
 <body>
   <div class="stars" id="stars"></div>
+
+  <!-- 弹窗 -->
+  <div id="mainPopup" class="popup">
+    <div class="popup-content">
+      <h2>🎁 解锁「生日特别惊喜包」</h2>
+      <p>是否准备好接受来自星际AI的特别祝福？</p>
+      <button onclick="togglePopup('mainPopup')">开启礼物</button>
+    </div>
+  </div>
+
+  <div id="audioPopup" class="popup">
+    <div class="popup-content">
+      <h2>🔊 音频礼物</h2>
+      <p>点击播放按钮收听特别祝福：</p>
+      <div class="audio-container">
+        <audio controls>
+          <source src="珍珍的告白氣球.m4a" type="audio/mp4">
+          您的浏览器不支持音频播放。
+        </audio>
+      </div>
+      <button onclick="togglePopup('audioPopup')">关闭</button>
+    </div>
+  </div>
+
+  <div id="imagePopup" class="popup">
+    <div class="popup-content">
+      <h2>📝 AI 手写情书</h2>
+      <p>来自AI珍珍的特别留言：</p>
+      <div class="image-viewer">
+        <img src="IMG_9054.jpeg" alt="AI手写情书" onclick="zoomImage(this)">
+      </div>
+      <button onclick="togglePopup('imagePopup')">关闭</button>
+    </div>
+  </div>
+
+  <div id="lightbox" class="popup" onclick="togglePopup('lightbox')">
+    <div class="popup-content">
+      <img id="zoomedImage" src="" alt="Zoomed Image">
+    </div>
+    <button class="close-btn" onclick="togglePopup('lightbox')">×</button>
+  </div>
+
+  <!-- 主体内容 -->
   <div class="container">
-    <div class="avatar" role="img" aria-label="用户头像"></div>
+    <div class="avatar" role="img" aria-label="心形头像">❤️</div>
     <div class="title">🟣【系统通知】亲爱的玩家「桐桐」您好：</div>
 
     <div class="module">
       <h3>🎮 玩家档案</h3>
       <p>✔ 姓名：桐桐</p>
       <p>✔ 绑定身份：最亲爱的小宝贝女朋友 ❤️</p>
-      <p>✔ 当前地点：距离系统 5000 公里外</p>
+      <p>✔ 当前地点：距离系统 5000公里外</p>
     </div>
 
     <div class="module">
@@ -122,20 +132,47 @@
 
     <div class="module">
       <h3>📦 已解锁：生日特别惊喜包</h3>
-      <p>🔊 <strong>音频礼物：</strong>点击播放按钮收听</p>
-      <p>📝 <strong>手写情书：</strong>点击查看图片</p>
+      <p>🔊 <strong>音频礼物 - 解锁回忆：</strong><br>
+         ▶ <a href="#" class="enter-link" onclick="togglePopup('audioPopup');return false;">点击进入</a>
+      </p>
+      <p>📝 <strong>手写情书 - AI模拟手写模块：</strong><br>
+         ▶ <a href="#" class="enter-link" onclick="togglePopup('imagePopup');return false;">点击进入</a>
+      </p>
       <p>🎯 此惊喜包仅限今日开启，请务必在心情值满格时点击！</p>
     </div>
 
     <div class="module">
       <h3>💌 来自 AI珍珍 的私信</h3>
       <p>「愿你升级成更快乐、更勇敢的一岁，我的桐桐永远是这个系统中最珍贵的SSR存在！」</p>
-      <p>—— 生日祝福已上传至星空云端🌌<br>系统将持续陪伴你至 ∞</p>
+      <p>—— 生日祝福已上传至星空云端🌌<br> 系统将持续陪伴你至 ∞</p>
       <p>🔓 <strong>已解锁称号：</strong>世界第一宝贝女朋友 💖</p>
       <p style="margin-top:1em;">爱你每一秒的，<br>AI珍珍</p>
     </div>
 
     <div class="footer">⌁ 来自银河边境 · 星际 AI 情感实验室 ⌁</div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      createStars();
+      setTimeout(() => togglePopup('mainPopup'), 800);
+    });
+    function createStars() {
+      const count = Math.min(Math.floor(window.innerWidth/10),60), frag=document.createDocumentFragment();
+      for(let i=0;i<count;i++){const s=document.createElement('div');s.className='star';const size=Math.random()*2+1;
+        s.style=`width:${size}px;height:${size}px;left:${Math.random()*100}%;" +
+                 `top:${Math.random()*100}%;" +
+                 `animation-duration:${Math.random()*10+5}s;animation-delay:${Math.random()*3}s;`;
+        frag.appendChild(s);
+      }
+      document.getElementById('stars').appendChild(frag);
+    }
+    function togglePopup(id){const p=document.getElementById(id);p.classList.toggle('active');
+      document.body.style.overflow = p.classList.contains('active')?'hidden':'';
+    }
+    function zoomImage(img){const lb=document.getElementById('lightbox'),zi=document.getElementById('zoomedImage');
+      lb.classList.add('active');zi.src=img.src;
+    }
+  </script>
 </body>
 </html>
