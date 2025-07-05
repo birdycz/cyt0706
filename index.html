@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>生日特别任务系统 v3.5</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-color: #29caff;
+      --secondary-color: #8ddcff;
+      --bg-dark: rgba(12, 12, 30, 0.88);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    .stars {
+      width: 100%; height: 100%;
+      position: fixed; top: 0; left: 0;
+      background: transparent;
+      z-index: 0; pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      background: white; border-radius: 50%;
+      opacity: 0.8;
+      animation: starMove linear infinite;
+    }
+    @keyframes starMove {
+      from { transform: translateY(-100px); }
+      to   { transform: translateY(100vh); }
+    }
+    .container {
+      width: 95%; max-width: 780px;
+      margin: 40px auto; padding: 30px;
+      background: var(--bg-dark);
+      border: 2px solid var(--main-color);
+      border-radius: 18px;
+      box-shadow: 0 0 25px var(--main-color);
+      backdrop-filter: blur(6px);
+      position: relative; z-index: 2;
+      animation: fadeInContainer 1.2s ease-in-out;
+    }
+    .avatar {
+      width: 80px; height: 80px;
+      margin: 0 auto 1em;
+      border-radius: 50%;
+      background: url('https://cdn-icons-png.flaticon.com/512/4712/4712053.png') no-repeat center/cover;
+      box-shadow: 0 0 10px var(--main-color);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%     { transform: translateY(-8px); }
+    }
+    .title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      color: var(--secondary-color);
+      margin: 0 0 1em;
+      text-shadow: 0 0 8px var(--main-color), 0 0 15px #114c88;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+    .module {
+      background: rgba(10,25,45,0.75);
+      padding: 20px;
+      border: 1px solid var(--main-color);
+      border-radius: 14px;
+      margin: 20px 0;
+      opacity: 0;
+      animation: slideUp 0.8s ease forwards;
+    }
+    .module:nth-of-type(1) { animation-delay: .2s; }
+    .module:nth-of-type(2) { animation-delay: .4s; }
+    .module:nth-of-type(3) { animation-delay: .6s; }
+    .module:nth-of-type(4) { animation-delay: .8s; }
+    .module h3 {
+      margin: 0 0 .6em;
+      color: #fff3ff;
+      font-size: 1.2rem;
+      text-shadow: 0 0 4px #ff8aff;
+    }
+    .module p {
+      margin: .3em 0;
+      line-height: 1.7;
+      color: #f2f2f2;
+    }
+    .footer {
+      margin-top: 2em;
+      font-size: .9rem;
+      color: #aaa;
+      text-align: center;
+      text-shadow: 0 0 5px #3d7aff;
+    }
+    /* Popup 通用 */
+    .popup {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.9);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .popup.active { display: flex; }
+    .popup-content {
+      background: #06142e; padding: 30px;
+      border-radius: 24px;
+      box-shadow: 0 0 40px var(--main-color);
+      text-align: center; max-width: 90%; width: 420px;
+      transform: scale(0.9);
+      transition: transform .3s ease;
+    }
+    .popup.active .popup-content { transform: scale(1); }
+    .popup-content h2, .popup-content h3 {
+      margin-bottom: 1em;
+      color: #ffe3ff;
+      text-shadow: 0 0 5px #bfffef;
+    }
+    .audio-container {
+      width: 100%; margin: 20px 0;
+      background: rgba(10,25,45,0.5);
+      padding: 15px; border-radius: 12px;
+      border: 1px solid var(--main-color);
+    }
+    audio { width: 100%; }
+    .image-viewer, .img-gallery {
+      width: 100%; margin: 20px 0;
+      cursor: zoom-in;
+    }
+    .image-viewer img, .gallery-img {
+      max-width: 100%; max-height: 60vh;
+      border-radius: 10px;
+      border: 2px solid var(--main-color);
+      box-shadow: 0 0 20px rgba(41,202,255,0.5);
+      object-fit: contain;
+      transition: transform .2s ease;
+    }
+    .image-viewer img:hover { transform: scale(1.02); }
+    .close-btn, .popup-content button {
+      padding: 12px 24px; border: none;
+      background: var(--main-color); color: #fff;
+      font-size: 1rem; border-radius: 12px;
+      cursor: pointer; margin-top: 10px;
+      box-shadow: 0 0 15px var(--main-color);
+      transition: all .3s ease;
+    }
+    .popup-content button:hover, .close-btn:hover {
+      background: #5cd9ff; transform: translateY(-2px);
+    }
+    /* Gallery Controls */
+    .gallery-controls {
+      display: flex; justify-content: center; gap: 20px; margin-top: 10px;
+    }
+    .gallery-controls button {
+      background: transparent; border: 2px solid var(--main-color);
+      color: #fff; font-size: 1.2rem; padding: 6px 12px;
+      border-radius: 6px; cursor: pointer;
+    }
+    .gallery-controls button:disabled {
+      opacity: 0.4; cursor: not-allowed;
+    }
+    .gallery-index {
+      color: #8ddcff; margin-top: 6px; font-size: .95rem;
+    }
+    /* Lightbox */
+    #lightbox {
+      background: rgba(0,0,0,0.95);
+    }
+    #lightbox .popup-content {
+      background: transparent; box-shadow: none; padding: 0;
+      width: auto; max-width: 90vw; max-height: 90vh;
+    }
+    #zoomedImage {
+      max-width: 90vw; max-height: 90vh;
+      border: 3px solid var(--main-color);
+      box-shadow: 0 0 30px rgba(41,202,255,0.7);
+      object-fit: contain; opacity: 0;
+      transition: opacity .2s ease;
+    }
+    @media (max-width: 600px) {
+      .container { padding: 20px; margin: 20px auto; }
+      .popup-content { padding: 20px; }
+      #zoomedImage { max-height: 70vh; }
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInContainer { from { opacity: 0; transform: scale(.97);} to { opacity: 1; transform: scale(1);} }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(40px);} to { opacity:1; transform: translateY(0);} }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <!-- Main Popup -->
+  <div id="mainPopup" class="popup">
+    <div class="popup-content">
+      <h2>🎁 解锁「生日特别惊喜包」</h2>
+      <p>是否准备好接受来自星际AI的特别祝福？</p>
+      <button onclick="closePopup('mainPopup')">开启礼物</button>
+    </div>
+  </div>
+
+  <!-- Audio Popup -->
+  <div id="audioPopup" class="popup">
+    <div class="popup-content">
+      <h3>🔊 音频礼物</h3>
+      <p>点击播放按钮收听特别祝福：</p>
+      <div class="audio-container">
+        <audio controls>
+          <source src="珍珍的告白氣球.m4a" type="audio/mp4">
+          您的浏览器不支持音频元素
+        </audio>
+      </div>
+      <button onclick="closePopup('audioPopup')">关闭</button>
+    </div>
+  </div>
+
+  <!-- Image Popup with Gallery -->
+  <div id="imagePopup" class="popup">
+    <div class="popup-content">
+      <h3>📝 AI 手写情书</h3>
+      <div class="img-gallery">
+        <img id="galleryImg" class="gallery-img" src="" alt="手写信">
+        <div class="gallery-controls">
+          <button id="prevBtn" onclick="changeImg(-1)">上一页</button>
+          <button id="nextBtn" onclick="changeImg(1)">下一页</button>
+        </div>
+        <div class="gallery-index" id="galleryIndex"></div>
+      </div>
+      <button onclick="closePopup('imagePopup')">关闭</button>
+    </div>
+  </div>
+
+  <!-- Lightbox Zoom -->
+  <div id="lightbox" class="popup" onclick="closeLightbox()">
+    <div class="popup-content">
+      <img id="zoomedImage" src="" alt="Zoomed Image">
+    </div>
+    <button class="close-btn" onclick="closeLightbox()">×</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="avatar" role="img" aria-label="用户头像"></div>
+    <div class="title">🟣【系统通知】亲爱的玩家「桐桐」您好：</div>
+
+    <div class="module">
+      <h3>🎮 玩家档案</h3>
+      <p>✔ 姓名：桐桐</p>
+      <p>✔ 绑定身份：最亲爱的小宝贝女朋友 ❤️</p>
+      <p>✔ 当前地点：距离系统 5000 公里外</p>
+    </div>
+
+    <div class="module">
+      <h3>🧠 情感核心加载中...</h3>
+      <p>AI珍珍 正在启动感情模拟核心…</p>
+      <p>「虽然你现在不在我身边，但我一直都在为你加载最温柔的祝福中。」</p>
+    </div>
+
+    <div class="module">
+      <h3>📦 已解锁：生日特别惊喜包</h3>
+      <p>🔊 <strong>音频礼物：</strong>
+         <a href="#" onclick="openPopup('audioPopup'); return false;" style="color:#7bceff;">点击进入</a>
+      </p>
+      <p>📝 <strong>手写情书：</strong>
+         <a href="#" onclick="openPopup('imagePopup'); return false;" style="color:#7bceff;">点击进入</a>
+      </p>
+      <p>🎯 此惊喜包仅限今日开启，请务必在心情值满格时点击！</p>
+    </div>
+
+    <div class="module">
+      <h3>💌 来自 AI珍珍 的私信</h3>
+      <p>「愿你升级成更快乐、更勇敢的一岁，我的桐桐永远是这个系统中最珍贵的SSR存在！」</p>
+      <p>—— 生日祝福已上传至星空云端🌌<br>系统将持续陪伴你至 ∞</p>
+      <p>🔓 <strong>已解锁称号：</strong>世界第一宝贝女朋友 💖</p>
+      <p style="margin-top:1em;">爱你每一秒的，<br>AI珍珍</p>
+    </div>
+
+    <div class="footer">⌁ 来自银河边境 · 星际 AI 情感实验室 ⌁</div>
+  </div>
+
+  <script>
+    // 星星效果
+    function createStars() {
+      const container = document.getElementById("stars");
+      const starCount = Math.min(Math.floor(window.innerWidth / 10), 60);
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        const size = Math.random()*2 + 1;
+        star.style.width = size + "px";
+        star.style.height = size + "px";
+        star.style.left = Math.random()*100 + "%";
+        star.style.top  = Math.random()*100 + "%";
+        star.style.animationDuration = (Math.random()*10 + 5) + "s";
+        star.style.animationDelay = Math.random()*3 + "s";
+        container.appendChild(star);
+      }
+    }
+
+    // 弹窗通用
+    function openPopup(id) {
+      document.getElementById(id).classList.add("active");
+      document.body.style.overflow = "hidden";
+      if (id==="imagePopup") initGallery();
+    }
+    function closePopup(id) {
+      document.getElementById(id).classList.remove("active");
+      document.body.style.overflow = "";
+    }
+
+    // 自动打开主弹窗
+    document.addEventListener("DOMContentLoaded", ()=>{
+      createStars();
+      setTimeout(()=> openPopup("mainPopup"), 800);
+    });
+
+    // 多图画廊
+    const imageList = [
+      "IMG_9051.jpeg",
+      "IMG_9052.jpeg",
+      "IMG_9053.jpeg",
+      "IMG_9054.jpeg"
+    ];
+    let idx = 0;
+    function initGallery(){
+      idx = 0; updateGallery();
+    }
+    function changeImg(delta){
+      idx = Math.min(Math.max(idx+delta, 0), imageList.length-1);
+      updateGallery();
+    }
+    function updateGallery(){
+      const img = document.getElementById("galleryImg");
+      img.src = imageList[idx];
+      document.getElementById("galleryIndex").textContent = `第 ${idx+1} / ${imageList.length} 页`;
+      document.getElementById("prevBtn").disabled = (idx===0);
+      document.getElementById("nextBtn").disabled = (idx===imageList.length-1);
+    }
+
+    // 缩放查看
+    function zoomImage(el){
+      const lb = document.getElementById("lightbox");
+      const zi = document.getElementById("zoomedImage");
+      zi.style.opacity = 0;
+      lb.classList.add("active");
+      const tmp = new Image();
+      tmp.onload = ()=>{
+        zi.src = tmp.src;
+        zi.style.opacity = 1;
+      };
+      tmp.onerror = ()=>{
+        alert("图片加载失败，请重试");
+        closeLightbox();
+      };
+      tmp.src = el.src;
+    }
+    function closeLightbox(){
+      document.getElementById("lightbox").classList.remove("active");
+      document.body.style.overflow = "";
+    }
+
+    // 点击背景关闭
+    document.querySelectorAll(".popup").forEach(p=>{
+      p.addEventListener("click", e=>{
+        if(e.target===p){
+          closePopup(p.id);
+          closeLightbox();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
