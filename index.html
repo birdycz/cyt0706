@@ -48,13 +48,11 @@
       animation: fadeInContainer 1.2s ease-in-out;
     }
     .avatar {
-      font-size: 64px;
       width: 80px;
       height: 80px;
       margin: 0 auto 1em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      border-radius: 50%;
+      background: url('https://i.ibb.co/Jy1YsxX/pix-heart.png') no-repeat center/cover;
       box-shadow: 0 0 10px var(--main-color);
       animation: float 3s ease-in-out infinite;
     }
@@ -70,67 +68,43 @@
       text-align: center;
       animation: fadeIn 1s ease-in-out;
     }
-    /* ... (các đoạn CSS khác giữ nguyên như bạn gửi) ... */
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes fadeInContainer { from { opacity: 0; transform: scale(.97);} to { opacity: 1; transform: scale(1);} }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(40px);} to { opacity:1; transform: translateY(0);} }
+    .module {
+      background: rgba(10,25,45,0.75);
+      padding: 20px;
+      border: 1px solid var(--main-color);
+      border-radius: 14px;
+      margin: 20px 0;
+      opacity: 0;
+      animation: slideUp 0.8s ease forwards;
+    }
+    .module:nth-of-type(1) { animation-delay: .2s; }
+    .module:nth-of-type(2) { animation-delay: .4s; }
+    .module:nth-of-type(3) { animation-delay: .6s; }
+    .module:nth-of-type(4) { animation-delay: .8s; }
+    .module h3 {
+      margin: 0 0 .6em;
+      color: #fff3ff;
+      font-size: 1.2rem;
+      text-shadow: 0 0 4px #ff8aff;
+    }
+    .module p {
+      margin: .3em 0;
+      line-height: 1.7;
+      color: #f2f2f2;
+    }
+    .footer {
+      margin-top: 2em;
+      font-size: .9rem;
+      color: #aaa;
+      text-align: center;
+      text-shadow: 0 0 5px #3d7aff;
+    }
   </style>
 </head>
 <body>
   <div class="stars" id="stars"></div>
-
-  <!-- Main Popup -->
-  <div id="mainPopup" class="popup">
-    <div class="popup-content">
-      <h2>🎁 解锁「生日特别惊喜包」</h2>
-      <p>是否准备好接受来自星际AI的特别祝福？</p>
-      <button onclick="closePopup('mainPopup')">开启礼物</button>
-    </div>
-  </div>
-
-  <!-- Audio Popup -->
-  <div id="audioPopup" class="popup">
-    <div class="popup-content">
-      <h3>🔊 音频礼物</h3>
-      <p>点击播放按钮收听特别祝福：</p>
-      <div class="audio-container">
-        <audio controls>
-          <source src="珍珍的告白氣球.m4a" type="audio/mp4">
-          您的浏览器不支持音频元素
-        </audio>
-      </div>
-      <button onclick="closePopup('audioPopup')">关闭</button>
-    </div>
-  </div>
-
-  <!-- Image Popup -->
-  <div id="imagePopup" class="popup">
-    <div class="popup-content">
-      <h3>📝 AI 手写情书</h3>
-      <div class="img-gallery">
-        <img id="galleryImg" class="gallery-img" src="" alt="手写信">
-        <div class="gallery-controls">
-          <button id="prevBtn" onclick="changeImg(-1)">上一页</button>
-          <button id="nextBtn" onclick="changeImg(1)">下一页</button>
-        </div>
-        <div class="gallery-index" id="galleryIndex"></div>
-      </div>
-      <button onclick="closePopup('imagePopup')">关闭</button>
-    </div>
-  </div>
-
-  <!-- Lightbox -->
-  <div id="lightbox" class="popup" onclick="closeLightbox()">
-    <div class="popup-content">
-      <img id="zoomedImage" src="" alt="Zoomed Image">
-    </div>
-    <button class="close-btn" onclick="closeLightbox()">×</button>
-  </div>
-
-  <!-- Main Content -->
   <div class="container">
-    <div class="avatar" role="img" aria-label="心形头像">❤️</div>
+    <div class="avatar" role="img" aria-label="用户头像"></div>
     <div class="title">🟣【系统通知】亲爱的玩家「桐桐」您好：</div>
 
     <div class="module">
@@ -148,12 +122,8 @@
 
     <div class="module">
       <h3>📦 已解锁：生日特别惊喜包</h3>
-      <p>🔊 <strong>音频礼物：</strong>
-         <a href="#" onclick="openPopup('audioPopup'); return false;" style="color:#7bceff;">点击进入</a>
-      </p>
-      <p>📝 <strong>手写情书：</strong>
-         <a href="#" onclick="openPopup('imagePopup'); return false;" style="color:#7bceff;">点击进入</a>
-      </p>
+      <p>🔊 <strong>音频礼物：</strong>点击播放按钮收听</p>
+      <p>📝 <strong>手写情书：</strong>点击查看图片</p>
       <p>🎯 此惊喜包仅限今日开启，请务必在心情值满格时点击！</p>
     </div>
 
@@ -167,84 +137,5 @@
 
     <div class="footer">⌁ 来自银河边境 · 星际 AI 情感实验室 ⌁</div>
   </div>
-
-  <script>
-    function createStars() {
-      const container = document.getElementById("stars");
-      const starCount = Math.min(Math.floor(window.innerWidth / 10), 60);
-      for (let i = 0; i < starCount; i++) {
-        const star = document.createElement("div");
-        star.className = "star";
-        const size = Math.random()*2 + 1;
-        star.style.width = size + "px";
-        star.style.height = size + "px";
-        star.style.left = Math.random()*100 + "%";
-        star.style.top  = Math.random()*100 + "%";
-        star.style.animationDuration = (Math.random()*10 + 5) + "s";
-        star.style.animationDelay = Math.random()*3 + "s";
-        container.appendChild(star);
-      }
-    }
-
-    function openPopup(id) {
-      document.getElementById(id).classList.add("active");
-      document.body.style.overflow = "hidden";
-      if (id==="imagePopup") initGallery();
-    }
-    function closePopup(id) {
-      document.getElementById(id).classList.remove("active");
-      document.body.style.overflow = "";
-    }
-
-    document.addEventListener("DOMContentLoaded", ()=>{
-      createStars();
-      setTimeout(()=> openPopup("mainPopup"), 800);
-    });
-
-    const imageList = ["IMG_9051.jpeg", "IMG_9052.jpeg", "IMG_9053.jpeg", "IMG_9054.jpeg"];
-    let idx = 0;
-    function initGallery(){ idx = 0; updateGallery(); }
-    function changeImg(delta){
-      idx = Math.min(Math.max(idx+delta, 0), imageList.length-1);
-      updateGallery();
-    }
-    function updateGallery(){
-      const img = document.getElementById("galleryImg");
-      img.src = imageList[idx];
-      document.getElementById("galleryIndex").textContent = `第 ${idx+1} / ${imageList.length} 页`;
-      document.getElementById("prevBtn").disabled = (idx===0);
-      document.getElementById("nextBtn").disabled = (idx===imageList.length-1);
-    }
-
-    function zoomImage(el){
-      const lb = document.getElementById("lightbox");
-      const zi = document.getElementById("zoomedImage");
-      zi.style.opacity = 0;
-      lb.classList.add("active");
-      const tmp = new Image();
-      tmp.onload = ()=>{
-        zi.src = tmp.src;
-        zi.style.opacity = 1;
-      };
-      tmp.onerror = ()=>{
-        alert("图片加载失败，请重试");
-        closeLightbox();
-      };
-      tmp.src = el.src;
-    }
-    function closeLightbox(){
-      document.getElementById("lightbox").classList.remove("active");
-      document.body.style.overflow = "";
-    }
-
-    document.querySelectorAll(".popup").forEach(p=>{
-      p.addEventListener("click", e=>{
-        if(e.target===p){
-          closePopup(p.id);
-          closeLightbox();
-        }
-      });
-    });
-  </script>
 </body>
 </html>
